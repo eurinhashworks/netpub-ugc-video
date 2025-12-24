@@ -1,20 +1,33 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# NetPub - Agence Video UGC Production Publicitaire
 
-# Run and deploy your AI Studio app
+Bienvenue sur le dépôt officiel de NetPub.
 
-This contains everything you need to run your app locally.
+## 📚 Documentation
 
-View your app in AI Studio: https://ai.studio/apps/drive/1aF06Mfpzzv3lVvan7dklR7GduHqeok7_
+La documentation complète du projet est disponible dans le dossier [`docs/`](docs/).
 
-## Run Locally
+Veuillez consulter les guides suivants pour commencer :
 
-**Prerequisites:**  Node.js
+- **[Vue d'ensemble](docs/01-overview.md)** : Comprendre le projet.
+- **[Installation & Démarrage](docs/03-install-dev.md)** : Configurer votre environnement de développement.
+- **[Architecture](docs/02-architecture-diagrams.md)** : Diagrammes techniques.
+- **[Déploiement](docs/08-production-deployment.md)** : Mettre en production.
 
+## 🚀 Démarrage Rapide (Dev)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+```bash
+# Installer les dépendances
+npm install
+
+# Configurer l'environnement
+cp .env.example .env
+
+# Lancer la base de données
+docker-compose up -d db
+npm run db:migrate
+
+# Lancer le projet
+npm run dev
+```
+
+Pour plus de détails, voir [`docs/03-install-dev.md`](docs/03-install-dev.md).

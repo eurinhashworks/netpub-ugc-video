@@ -8,7 +8,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/netpub_ugc_video}
+      DATABASE_URL: ${DATABASE_URL}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       JWT_SECRET: ${JWT_SECRET}
       SESSION_SECRET: ${SESSION_SECRET}
@@ -28,12 +28,11 @@ services:
       - ./logs:/app/logs:rw
       - app-temp:/app/temp
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
     networks:
       - netpub-internal
+      - proxy
     restart: unless-stopped
     deploy:
       resources:
@@ -112,63 +111,6 @@ services:
       - "traefik.http.services.netpub.loadbalancer.healthcheck.timeout=5s"
 
   # ====================================
-  # PostgreSQL Database
-  # ====================================
-  db:
-    image: postgres:15-alpine
-    container_name: netpub-db
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-netpub_ugc_video}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
-      PGDATA: /var/lib/postgresql/data/pgdata
-      TZ: ${TZ:-UTC}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backups:/backups:rw
-    networks:
-      - netpub-internal
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-netpub_ugc_video}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    command: >
-      postgres
-      -c shared_buffers=256MB
-      -c max_connections=200
-      -c effective_cache_size=1GB
-      -c maintenance_work_mem=64MB
-      -c checkpoint_completion_target=0.9
-      -c wal_buffers=16MB
-      -c default_statistics_target=100
-      -c random_page_cost=1.1
-      -c effective_io_concurrency=200
-      -c work_mem=2621kB
-      -c min_wal_size=1GB
-      -c max_wal_size=4GB
-    security_opt:
-      - no-new-privileges:true
-    labels:
-      - "traefik.enable=false"
-
-  # ====================================
   # Redis Cache
   # ====================================
   redis:
@@ -212,43 +154,6 @@ services:
     labels:
       - "traefik.enable=false"
 
-  # ====================================
-  # Database Backup Service (Optional)
-  # ====================================
-  db-backup:
-    image: postgres:15-alpine
-    container_name: netpub-db-backup
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_DB: ${POSTGRES_DB:-netpub_ugc_video}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
-    volumes:
-      - ./backups:/backups:rw
-      - ./scripts/backup.sh:/backup.sh:ro
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - netpub-internal
-    restart: unless-stopped
-    command: >
-      sh -c "
-      apk add --no-cache dcron &&
-      echo '0 2 * * * /backup.sh' > /etc/crontabs/root &&
-      crond -f -l 2
-      "
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "2"
-    labels:
-      - "traefik.enable=false"
-    profiles:
-      - with-backup
-
 # ====================================
 # Networks
 # ====================================
@@ -260,17 +165,14 @@ networks:
     internal: false
     
   # Réseau Traefik externe (doit exister déjà)
-  # proxy:
-  #   external: true
-  #   name: proxy
+  proxy:
+    external: true
+    name: proxy
 
 # ====================================
 # Volumes
 # ====================================
 volumes:
-  postgres_data:
-    name: netpub-postgres-data
-    driver: local
   redis_data:
     name: netpub-redis-data
     driver: local

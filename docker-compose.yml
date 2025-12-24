@@ -3,7 +3,7 @@ services:
   # Application Service
   # ====================================
   app:
-    image: eflexcloud/netpub-ugc-video:latest
+    image: eflexcloud/netpub-ugc-video:v1.1.0
     container_name: netpub-app
     environment:
       NODE_ENV: production

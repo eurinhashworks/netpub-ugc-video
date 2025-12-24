@@ -1,6 +1,16 @@
+import './load-env.js'; // Must be first import
 import express from 'express';
 import cors from 'cors';
 import { ApolloServer } from 'apollo-server-express';
+import dotenv from 'dotenv'; // Still needed if referenced, but config is done
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Logs et diagnostics
+
 import { typeDefs } from './graphql/schema.js';
 import { resolvers } from './graphql/resolvers.js';
 import { prisma } from './lib/prisma.js';
@@ -16,6 +26,10 @@ import session from 'express-session';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 4000;
+
+console.log('✅ Server starting...');
+console.log('📊 Environment:', process.env.NODE_ENV);
+console.log('🔑 JWT Secret loaded:', !!process.env.JWT_SECRET);
 
 // Logs et diagnostics
 

@@ -1,0 +1,88 @@
+services:
+  # ====================================
+  # Application Service
+  # ====================================
+  app:
+    image: eflexcloud/netpub-ugc-video:v1.1.0
+    env_file:
+      - .env.production
+    volumes:
+      - uploads:/app/uploads:rw
+      - logs:/app/logs:rw
+      - app-temp:/app/temp
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      - PORT=4000
+      - RAILWAY_ENVIRONMENT=${RAILWAY_ENVIRONMENT}
+
+  # ====================================
+  # Redis Cache
+  # ====================================
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# ====================================
+# Volumes
+# ====================================
+volumes:
+  redis_data:
+    driver: local
+  app-temp:
+    driver: local
+  uploads:
+    driver: local
+  logs:
+    driver: local

@@ -2,18 +2,18 @@
   display: -webkit-box; /* Not needed if autoprefixing */
   display: -ms-flexbox; /* Not needed if autoprefixing */
   display: flex;
-  margin-left: -16px; /* gutter size offset */
+  margin-left: -32px; /* Increased gutter size offset */
   width: auto;
 }
 
 .my-masonry-grid_column {
-  padding-left: 16px; /* gutter size */
+  padding-left: 32px; /* Increased gutter size */
   background-clip: padding-box;
 }
 
 /* Style your items */
 .my-masonry-grid_column > div {
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 @media (max-width: 767px) {

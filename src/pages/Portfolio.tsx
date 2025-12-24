@@ -16,20 +16,53 @@ const Portfolio: React.FC = () => {
 
   const categories = ['All', ...Object.values(PortfolioCategory)];
 
-  const filteredProjects = useMemo(() => {
+  const groupedProjects = useMemo(() => {
+    // 1. Filter influencers and keep them individual
+    const influencers = portfolioProjects.filter(p => p.category === PortfolioCategory.INFLUENCEUSES);
+
+    // 2. Group other projects by category
+    const otherCategories = Object.values(PortfolioCategory).filter(cat => cat !== PortfolioCategory.INFLUENCEUSES);
+
+    const categoryGroups = otherCategories.map((cat, index) => {
+      const projectsInCat = portfolioProjects.filter(p => p.category === cat);
+      if (projectsInCat.length === 0) return null;
+
+      // Group all media into one "super-project"
+      const allMedia: Array<{ url: string; type: 'image' | 'video' }> = [];
+      projectsInCat.forEach(p => {
+        if (p.mediaItems) {
+          allMedia.push(...p.mediaItems);
+        } else {
+          allMedia.push({ url: p.mediaUrl, type: p.mediaType });
+        }
+      });
+
+      return {
+        id: -(index + 1), // Negative IDs for category groups to avoid collision
+        title: cat,
+        category: cat,
+        mediaUrl: allMedia[0]?.url || '',
+        mediaType: allMedia[0]?.type || 'image',
+        mediaItems: allMedia,
+        tags: [cat],
+        description: `Découvrez nos réalisations en ${cat}.`
+      } as PortfolioProject;
+    }).filter(p => (p !== null)) as PortfolioProject[];
+
+    // 3. Combine based on selected category
     if (selectedCategory === 'All') {
-      // Create a map for quick lookup
-      const featuredMap = new Map(featuredProjectIds.map((id, index) => [id, index]));
-      // Filter and sort based on the user's specific list
-      return portfolioProjects
-        .filter(p => featuredMap.has(p.id))
-        .sort((a, b) => (featuredMap.get(a.id) ?? 0) - (featuredMap.get(b.id) ?? 0));
+      return [...categoryGroups, ...influencers];
     }
-    return portfolioProjects.filter(p => p.category === selectedCategory);
+
+    if (selectedCategory === PortfolioCategory.INFLUENCEUSES) {
+      return influencers;
+    }
+
+    return categoryGroups.filter(p => p.category === selectedCategory);
   }, [selectedCategory]);
 
   const handleCardClick = (project: PortfolioProject) => {
-    const projectIndex = filteredProjects.findIndex(p => p.id === project.id);
+    const projectIndex = groupedProjects.findIndex(p => p.id === project.id);
     setInitialProjectIndex(projectIndex);
     setViewMode('feed');
   };
@@ -40,17 +73,17 @@ const Portfolio: React.FC = () => {
 
   if (viewMode === 'feed') {
     return (
-      <ProjectFeed 
-        projects={filteredProjects} 
-        initialProjectIndex={initialProjectIndex} 
-        onClose={handleCloseFeed} 
+      <ProjectFeed
+        projects={groupedProjects}
+        initialProjectIndex={initialProjectIndex}
+        onClose={handleCloseFeed}
       />
     );
   }
 
   return (
     <div className="page-container portfolio-page">
-      <SEO 
+      <SEO
         title="Portfolio - Nos Réalisations de Vidéos UGC & Publicitaires"
         description="Explorez les réalisations de NetPub. Découvrez notre portfolio de vidéos UGC, de spots publicitaires créatifs et de contenu de marque qui captivent et convertissent."
         keywords="portfolio, réalisations, vidéos UGC, spots publicitaires, contenu de marque, études de cas, netpub"
@@ -59,7 +92,7 @@ const Portfolio: React.FC = () => {
         <p className="article-meta">Notre travail</p>
         <h1>Découvrez nos réalisations</h1>
       </header>
-      
+
       <div className="portfolio-filters">
         {categories.map(category => (
           <button
@@ -72,7 +105,7 @@ const Portfolio: React.FC = () => {
         ))}
       </div>
 
-      <MasonryGrid projects={filteredProjects} onProjectClick={handleCardClick} />
+      <MasonryGrid projects={groupedProjects} onProjectClick={handleCardClick} />
 
       <TestimonialCarousel />
       <CallToAction />

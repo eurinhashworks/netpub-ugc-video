@@ -40,7 +40,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project }) => {
     return (
         <div className="influencer-card">
             {/* Corner Labels */}
-            <div className="card-label top-right">Influenceuse UGC</div>
+            <div className="card-label top-right">{project.category}</div>
 
             {/* Main Media Background */}
             <div className="influencer-main-media">
@@ -59,6 +59,7 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project }) => {
                         src={currentMedia.url}
                         alt={project.title}
                         className="influencer-main-photo"
+                        loading="lazy"
                         key={currentMedia.url}
                     />
                 )}
@@ -83,10 +84,10 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project }) => {
                             {circle.item.type === 'video' ? (
                                 <video src={circle.item.url} muted playsInline preload="metadata" />
                             ) : (
-                                <img src={circle.item.url} alt="media preview" />
+                                <img src={circle.item.url} alt="media preview" loading="lazy" />
                             )}
                             {circle.index === activeIndex && idx === 1 && (
-                                <div className="circle-label">Voice #{circle.index + 1}</div>
+                                <div className="circle-label">Projet #{circle.index + 1}</div>
                             )}
                         </div>
                     ))}
@@ -105,17 +106,20 @@ const InfluencerCard: React.FC<InfluencerCardProps> = ({ project }) => {
                 {/* Bottom Information Container */}
                 <div className="influencer-bottom-info">
                     <div className="influencer-name-age">
-                        {project.title}, {project.age || 25}
+                        {project.category === 'Influenceuses'
+                            ? `${project.title}, ${project.age || 25}`
+                            : project.title
+                        }
                     </div>
 
                     <div className="influencer-badges-row">
-                        {project.hashtags?.slice(0, 3).map((tag, i) => (
+                        {(project.hashtags || project.tags)?.slice(0, 3).map((tag: string, i: number) => (
                             <span key={i} className="glass-badge">{tag}</span>
                         ))}
                     </div>
 
                     <div className="influencer-bio-row">
-                        {project.bio || "Coach fitness et amoureuse de la vie saine."}
+                        {project.description || project.bio || "Découvrez nos réalisations."}
                     </div>
                 </div>
 

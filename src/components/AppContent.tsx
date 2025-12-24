@@ -22,6 +22,7 @@ import Learning from '../pages/dashboard/Learning';
 import Chatbot from './Chatbot';
 import ProtectedRoute from './ProtectedRoute';
 import useScreenWidth from '../hooks/useScreenWidth';
+import NotFound from '../pages/NotFound';
 
 // This component scrolls the window to the top on every route change.
 const ScrollToTop = () => {
@@ -38,11 +39,12 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const isDashboardRoute = location.pathname.startsWith('/dashboard');
   const isLoginPage = location.pathname === '/login';
+  const is404Page = !['/', '/services', '/portfolio', '/about', '/contact', '/legal-mentions', '/privacy-policy', '/terms-of-service', '/login', '/admin-login'].includes(location.pathname) && !location.pathname.startsWith('/dashboard');
 
   return (
     <>
       <ScrollToTop />
-      {!isDashboardRoute && !isLoginPage && (isMobile ? <PillNavBar /> : <Header />)}
+      {!isDashboardRoute && !isLoginPage && !is404Page && (isMobile ? <PillNavBar /> : <Header />)}
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -63,9 +65,10 @@ const AppContent: React.FC = () => {
             <Route path="analytics" element={<Analytics />} />
             <Route path="learning" element={<Learning />} />
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isDashboardRoute && !isLoginPage && <Footer />}
+      {!isDashboardRoute && !isLoginPage && !is404Page && <Footer />}
       {!isLoginPage && <Chatbot />}
     </>
   );

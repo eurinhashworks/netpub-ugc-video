@@ -26,8 +26,6 @@ model User {
   updatedAt DateTime @updatedAt
 
   projects Project[]
-  comments Comment[]
-  likes    Like[]
 
   @@map("users")
 }
@@ -44,45 +42,10 @@ model Project {
   updatedAt    DateTime       @updatedAt
   userId       String
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comments     Comment[]
-  likes        Like[]
   ProjectMedia ProjectMedia[]
 }
 
-model Comment {
-  id          String   @id @default(uuid())
-  content     String
-  anonymousId String? // Pour l'ID anonyme du navigateur
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  userId String? // Rendre userId nullable pour les commentaires anonymes
-  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId Int
-
-  parentId String? // Pour les réponses
-  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies  Comment[] @relation("CommentReplies")
-
-  @@map("comments")
-}
-
-model Like {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-
-  userId      String? // Rendre userId nullable pour les likes anonymes
-  anonymousId String? // Pour l'ID anonyme du navigateur
-  user        User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId Int
-
-  // @@unique([userId, projectId]) // Supprimer cette contrainte pour permettre les likes anonymes
-  @@map("likes")
-}
 
 // Modèles pour le dashboard et le chat
 model Conversation {

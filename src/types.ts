@@ -14,20 +14,6 @@ export interface User {
   avatar?: string;
 }
 
-export interface Comment {
-  id: string;
-  user: User;
-  content: string;
-  createdAt: string;
-  replies?: Comment[];
-}
-
-export interface Like {
-  id: string;
-  userId?: string;
-  anonymousId?: string;
-}
-
 export interface PortfolioProject {
   id: number;
   title: string;
@@ -35,11 +21,9 @@ export interface PortfolioProject {
   mediaUrl: string;
   mediaType: 'image' | 'video';
   videoUrl?: string;
-  likes?: Like[];
-  comments?: Comment[];
-  likeCount?: number;
-  commentCount?: number;
   hashtags?: string[];
+  tags?: string[];
+  description?: string;
   // Optional fields, depending on usage
   client?: string;
   objective?: string;

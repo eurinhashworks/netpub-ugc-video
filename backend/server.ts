@@ -18,28 +18,19 @@ const app = express();
 const PORT = Number(process.env.PORT) || 4000;
 
 // Logs et diagnostics
-console.log('🚀 Démarrage du serveur backend NetPub...');
-console.log(`📊 Environnement: ${process.env.NODE_ENV || 'development'}`);
-console.log(`🔌 Port: ${PORT}`);
 
 // Validate required environment variables
 if (!process.env.SESSION_SECRET) {
   if (process.env.NODE_ENV === 'production') {
-    console.error('❌ ERROR: SESSION_SECRET environment variable is required in production');
-    console.error('Please set SESSION_SECRET in your .env file');
     process.exit(1);
   } else {
-    console.warn('⚠️  WARNING: SESSION_SECRET not set, using temporary secret for development');
   }
 }
 
 if (!process.env.JWT_SECRET) {
   if (process.env.NODE_ENV === 'production') {
-    console.error('❌ ERROR: JWT_SECRET environment variable is required in production');
-    console.error('Please set JWT_SECRET in your .env file');
     process.exit(1);
   } else {
-    console.warn('⚠️  WARNING: JWT_SECRET not set, using temporary secret for development');
   }
 }
 
@@ -73,7 +64,6 @@ app.use((req, res, next) => {
   res.on('finish', () => {
     const duration = endTimer();
     MonitoringUtils.trackApiCall(req.path, req.method, duration, res.statusCode);
-    console.log(`📨 ${req.method} ${req.path} - ${res.statusCode} - ${duration.toFixed(2)}ms`);
   });
 
   next();
@@ -113,7 +103,6 @@ const server = new ApolloServer({
       requestDidStart: async () => ({
         didEncounterErrors: async (requestContext) => {
           requestContext.errors?.forEach((error) => {
-            console.error('❌ Erreur GraphQL:', error);
             MonitoringUtils.trackError(error as Error);
           });
         },
@@ -124,7 +113,6 @@ const server = new ApolloServer({
 
 async function startServer() {
   try {
-    console.log('🔧 Initialisation du serveur GraphQL...');
     await server.start();
 
     // Configuration du limiteur de débit pour l'API GraphQL
@@ -140,19 +128,13 @@ async function startServer() {
     app.use(server.graphqlPath, apiLimiter);
 
     server.applyMiddleware({ app } as any);
-    console.log('✅ Serveur GraphQL initialisé avec succès');
 
     // Vérification de la connexion à la base de données
-    console.log('🔍 Vérification de la connexion à la base de données...');
     await prisma.$connect();
-    console.log('✅ Connexion à la base de données établie');
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Serveur prêt à l'adresse http://0.0.0.0:${PORT}${server.graphqlPath}`);
-      console.log(`🏥 Endpoint de santé disponible sur http://0.0.0.0:${PORT}/health`);
     });
   } catch (error) {
-    console.error('❌ Erreur lors du démarrage du serveur:', error);
     MonitoringUtils.trackError(error as Error);
     process.exit(1);
   }
@@ -160,19 +142,16 @@ async function startServer() {
 
 // Gestion globale des erreurs non capturées
 process.on('uncaughtException', (error) => {
-  console.error('❌ Exception non capturée:', error);
   MonitoringUtils.trackError(error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Promesse rejetée non gérée:', reason);
   MonitoringUtils.trackError(new Error(`Unhandled Rejection: ${reason}`));
   process.exit(1);
 });
 
 startServer().catch((error) => {
-  console.error('❌ Erreur fatale lors du démarrage:', error);
   MonitoringUtils.trackError(error);
   process.exit(1);
 });

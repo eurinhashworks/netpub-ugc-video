@@ -32,7 +32,8 @@
     "graphql-middleware": "^6.1.35",
     "helmet": "^8.1.0",
     "pg": "^8.16.3",
-    "prisma": "^7.2.0"
+    "prisma": "^7.2.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "@types/pg": "^8.16.0",

@@ -1,8 +1,7 @@
 import React from 'react';
 import Masonry from 'react-masonry-css';
-import PortfolioCard from './PortfolioCard';
 import InfluencerCard from './InfluencerCard';
-import { PortfolioCategory, PortfolioProject } from '../types';
+import { PortfolioProject } from '../types';
 import './MasonryGrid.css';
 
 interface MasonryGridProps {
@@ -24,15 +23,7 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({ projects, onProjectClick }) =
       columnClassName="my-masonry-grid_column"
     >
       {projects.map((project) => (
-        project.category === PortfolioCategory.INFLUENCEUSES ? (
-          <InfluencerCard key={project.id} project={project} />
-        ) : (
-          <PortfolioCard
-            key={project.id}
-            project={project}
-            onClick={onProjectClick}
-          />
-        )
+        <InfluencerCard key={project.id} project={project} />
       ))}
     </Masonry>
   );

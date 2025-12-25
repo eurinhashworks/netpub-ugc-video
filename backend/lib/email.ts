@@ -392,7 +392,7 @@ L'équipe NetPub Agency
               </div>
             </div>
             <div style="text-align: center; margin-top: 20px;">
-              <a href="https://netpub.agency/dashboard/conversations" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
+              <a href="https://netpub.eurinhash.com/dashboard/conversations" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold;">
                 Voir sur le Dashboard
               </a>
             </div>

@@ -152,8 +152,8 @@ const Contact = () => {
     {
       icon: FiMail,
       label: 'Écrivez-nous',
-      value: 'hello@netpub.agency',
-      href: 'mailto:hello@netpub.agency',
+      value: 'org.netpub@gmail.com',
+      href: 'mailto:org.netpub@gmail.com',
     },
     {
       icon: FiMapPin,
